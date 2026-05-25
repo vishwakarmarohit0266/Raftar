@@ -1,265 +1,825 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>असली लोकल ट्रांसफॉर्मर AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        /* कस्टम स्क्रॉलबार */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-        
-        /* टाइपिंग एनिमेशन */
-        .typing-dot {
-            animation: typing 1.4s infinite ease-in-out both;
-        }
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes typing {
-            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
-            40% { transform: scale(1); opacity: 1; }
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>रफ़्तार AI • Local Transformer</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+
+html,
+body{
+    margin:0;
+    padding:0;
+    background:#020617;
+    overflow:hidden;
+    font-family:sans-serif;
+}
+
+/* ===== SCROLLBAR ===== */
+
+::-webkit-scrollbar{
+    width:6px;
+}
+
+::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#334155;
+    border-radius:10px;
+}
+
+/* ===== BG EFFECT ===== */
+
+.bg-grid{
+    background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+
+    background-size:40px 40px;
+}
+
+/* ===== MESSAGE ANIMATION ===== */
+
+.msg{
+    animation:msg .25s ease;
+}
+
+@keyframes msg{
+
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0px);
+    }
+}
+
+/* ===== TYPING ===== */
+
+.typing-dot{
+    animation:typing 1.4s infinite ease-in-out both;
+}
+
+.typing-dot:nth-child(1){
+    animation-delay:-0.32s;
+}
+
+.typing-dot:nth-child(2){
+    animation-delay:-0.16s;
+}
+
+@keyframes typing{
+
+    0%,80%,100%{
+        transform:scale(0);
+        opacity:.5;
+    }
+
+    40%{
+        transform:scale(1);
+        opacity:1;
+    }
+}
+
+/* ===== GLASS ===== */
+
+.glass{
+    backdrop-filter:blur(10px);
+    background:rgba(15,23,42,.65);
+}
+
+/* ===== GLOW ===== */
+
+.glow{
+    box-shadow:
+        0 0 25px rgba(6,182,212,.35);
+}
+
+/* ===== TEXTAREA ===== */
+
+textarea{
+    max-height:180px;
+}
+
+</style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-white">
 
-    <div class="flex-1 flex flex-col max-w-4xl mx-auto w-full shadow-2xl bg-slate-950 border-x border-slate-800 relative overflow-hidden h-screen">
-        
-        <!-- हेडर -->
-        <div class="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center z-10 shadow-md">
+<body class="text-slate-100">
+
+<!-- ====================================================== -->
+<!-- MAIN -->
+<!-- ====================================================== -->
+
+<div class="fixed inset-0 bg-grid"></div>
+
+<div class="relative h-screen flex flex-col max-w-5xl mx-auto border-x border-slate-800">
+
+    <!-- ====================================================== -->
+    <!-- HEADER -->
+    <!-- ====================================================== -->
+
+    <header class="glass border-b border-slate-800 p-4 z-10">
+
+        <div class="flex items-center justify-between">
+
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                    <i data-lucide="cpu" class="w-6 h-6 text-white"></i>
+
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-700 flex items-center justify-center glow">
+
+                    <i data-lucide="brain-circuit"
+                       class="w-6 h-6 text-white"></i>
+
                 </div>
+
                 <div>
-                    <h1 class="font-bold text-lg text-slate-100 tracking-wide">लोकल ट्रांसफॉर्मर <span class="text-xs bg-cyan-900 text-cyan-300 px-2 py-0.5 rounded-full ml-1 border border-cyan-700">T5 Model</span></h1>
-                    <p class="text-xs text-slate-400">100% ब्राउज़र के अंदर चलने वाला असली AI</p>
+
+                    <h1 class="font-bold text-lg tracking-wide">
+
+                        रफ़्तार AI
+
+                    </h1>
+
+                    <p class="text-xs text-slate-400">
+
+                        100% Local Browser AI • Created By Rohit Vishwakarma
+
+                    </p>
+
                 </div>
             </div>
-        </div>
 
-        <!-- मॉडल डाउनलोडिंग / लोडिंग स्क्रीन (शुरुआत में दिखेगी) -->
-        <div id="loadingScreen" class="absolute inset-0 bg-slate-950/90 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-8 transition-opacity duration-500">
-            <div class="w-full max-w-md bg-slate-900 p-8 rounded-2xl border border-slate-700 shadow-2xl text-center space-y-6">
-                <div class="relative w-20 h-20 mx-auto">
-                    <div class="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
-                    <div class="absolute inset-0 border-4 border-cyan-500 rounded-full border-t-transparent animate-spin"></div>
-                    <i data-lucide="brain-circuit" class="w-8 h-8 text-cyan-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
-                </div>
-                
-                <div>
-                    <h2 class="text-xl font-bold text-slate-100 mb-2">AI का दिमाग डाउनलोड हो रहा है...</h2>
-                    <p class="text-sm text-slate-400">हम Hugging Face से <b>LaMini-Flan-T5</b> (लगभग 100MB) मॉडल तुम्हारे ब्राउज़र के कैश (Cache) में ला रहे हैं। यह सिर्फ एक बार होगा!</p>
+            <div class="flex items-center gap-2">
+
+                <div id="modelBadge"
+                     class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-xs text-amber-300">
+
+                    Loading Model...
+
                 </div>
 
-                <!-- प्रोग्रेस बार -->
-                <div class="space-y-2">
-                    <div class="flex justify-between text-xs text-slate-300 font-mono">
-                        <span id="downloadFile">शुरू हो रहा है...</span>
-                        <span id="downloadPercent">0%</span>
-                    </div>
-                    <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
-                        <div id="progressBar" class="bg-gradient-to-r from-cyan-500 to-blue-500 h-full w-0 transition-all duration-300"></div>
-                    </div>
-                </div>
             </div>
+
         </div>
 
-        <!-- चैट कंटेनर -->
-        <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth">
-            <!-- वेलकम मैसेज -->
-            <div class="flex justify-start">
-                <div class="bg-slate-800 text-slate-200 rounded-2xl rounded-tl-none p-4 max-w-[85%] shadow-md border border-slate-700">
-                    <p class="text-sm leading-relaxed">नमस्ते! मैं एक असली जनरेटिव AI हूँ। मेरा मॉडल तुम्हारे ही डिवाइस पर लोड हो चुका है।</p>
-                    <p class="text-sm leading-relaxed mt-2 text-cyan-300">नोट: मैं एक छोटा मॉडल (78 Million Parameters) हूँ, इसलिए मैं अंग्रेजी (English) ज़्यादा अच्छे से समझता हूँ। मुझसे इंग्लिश में सवाल पूछ कर देखो! (जैसे: "Write a poem about space" या "What is a black hole?")</p>
+    </header>
+
+    <!-- ====================================================== -->
+    <!-- CHAT -->
+    <!-- ====================================================== -->
+
+    <main id="chatContainer"
+          class="flex-1 overflow-y-auto p-4 space-y-5">
+
+        <!-- Welcome -->
+
+        <div class="flex justify-start msg">
+
+            <div class="max-w-[85%] bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-none p-4">
+
+                <p class="leading-relaxed">
+
+                    नमस्ते 👋<br><br>
+
+                    मैं <b>रफ़्तार AI</b> हूँ।<br>
+                    मैं तुम्हारे डिवाइस पर ही चलता हूँ 🔥
+
+                </p>
+
+                <div class="mt-4 text-sm text-cyan-300">
+
+                    Features:
+                    <br>
+                    • Offline AI
+                    <br>
+                    • Local Memory
+                    <br>
+                    • Voice Support
+                    <br>
+                    • Fast UI
+                    <br>
+                    • Browser Cache
+
                 </div>
+
             </div>
+
         </div>
 
-        <!-- टाइपिंग इंडिकेटर (छुपा हुआ) -->
-        <div id="typingIndicator" class="hidden px-4 pb-4">
-            <div class="flex justify-start">
-                <div class="bg-slate-800 rounded-2xl rounded-tl-none p-4 shadow-md border border-slate-700 flex items-center gap-1.5 w-fit">
-                    <div class="w-2 h-2 bg-cyan-500 rounded-full typing-dot"></div>
-                    <div class="w-2 h-2 bg-cyan-500 rounded-full typing-dot"></div>
-                    <div class="w-2 h-2 bg-cyan-500 rounded-full typing-dot"></div>
-                </div>
+    </main>
+
+    <!-- ====================================================== -->
+    <!-- TYPING -->
+    <!-- ====================================================== -->
+
+    <div id="typingIndicator"
+         class="hidden px-4 pb-4">
+
+        <div class="flex justify-start">
+
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-none px-4 py-3 flex gap-1">
+
+                <div class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"></div>
+
+                <div class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"></div>
+
+                <div class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"></div>
+
             </div>
+
         </div>
 
-        <!-- इनपुट एरिया -->
-        <div class="p-4 bg-slate-900 border-t border-slate-800 z-10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
-            <form id="chatForm" class="flex items-end gap-3">
-                <textarea 
-                    id="userInput" 
-                    rows="1" 
-                    placeholder="मुझसे कुछ भी पूछो... (English works best)" 
-                    disabled
-                    class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-slate-100 resize-none disabled:opacity-50 transition-all"
-                ></textarea>
-                <button 
-                    type="submit" 
-                    id="sendBtn" 
-                    disabled
-                    class="bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-700 disabled:text-slate-500 text-white p-3.5 rounded-xl transition-all shadow-lg shadow-cyan-600/20 flex items-center justify-center shrink-0"
-                >
-                    <i data-lucide="send" class="w-5 h-5"></i>
-                </button>
-            </form>
-        </div>
     </div>
 
-    <!-- Transformers.js को ES Module की तरह इम्पोर्ट करना -->
-    <script type="module">
-        // Hugging Face की Transformers.js लाइब्रेरी
-        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.1';
+    <!-- ====================================================== -->
+    <!-- INPUT -->
+    <!-- ====================================================== -->
 
-        // कॉन्फ़िगरेशन: हम लोकल फाइल्स नहीं ढूँढ रहे, सीधा हब (Hub) से लाएंगे
-        env.allowLocalModels = false;
-        env.useBrowserCache = true; // एक बार डाउनलोड होने के बाद सेव हो जाएगा
+    <footer class="glass border-t border-slate-800 p-4">
 
-        // UI एलिमेंट्स
-        const loadingScreen = document.getElementById('loadingScreen');
-        const progressBar = document.getElementById('progressBar');
-        const downloadFile = document.getElementById('downloadFile');
-        const downloadPercent = document.getElementById('downloadPercent');
-        const chatContainer = document.getElementById('chatContainer');
-        const chatForm = document.getElementById('chatForm');
-        const userInput = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const typingIndicator = document.getElementById('typingIndicator');
+        <form id="chatForm"
+              class="flex gap-3 items-end">
 
-        // AI मॉडल का वेरिएबल
-        let generator;
+            <!-- Voice -->
 
-        // चैट में मैसेज जोड़ने का फंक्शन
-        function appendMessage(sender, text) {
-            const wrapper = document.createElement('div');
-            wrapper.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+            <button type="button"
+                    id="voiceBtn"
+                    class="shrink-0 w-12 h-12 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition">
 
-            const bgColor = sender === 'user' ? 'bg-cyan-700 text-white rounded-tr-none' : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700';
-            
-            wrapper.innerHTML = `
-                <div class="${bgColor} rounded-2xl p-4 max-w-[85%] shadow-md whitespace-pre-wrap text-sm leading-relaxed">
-                    ${text}
-                </div>
-            `;
+                <i data-lucide="mic"
+                   class="w-5 h-5"></i>
 
-            chatContainer.appendChild(wrapper);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
+            </button>
 
-        // टेक्स्ट एरिया को ऑटो-रिसाइज़ करने का फंक्शन
-        userInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-            if(this.value.trim().length > 0 && generator) {
-                sendBtn.disabled = false;
-            } else {
-                sendBtn.disabled = true;
-            }
-        });
+            <!-- Input -->
 
-        // एंटर दबाने पर मैसेज भेजना (Shift+Enter से नई लाइन)
-        userInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                if(!sendBtn.disabled) chatForm.dispatchEvent(new Event('submit'));
-            }
-        });
+            <textarea
+                id="userInput"
+                rows="1"
+                placeholder="कुछ भी पूछो..."
+                disabled
+                class="flex-1 bg-slate-950 border border-slate-700 rounded-2xl px-4 py-3 resize-none outline-none focus:border-cyan-500 transition"
+            ></textarea>
 
-        // मॉडल को लोड करने का मुख्य फंक्शन
-        async function loadAIModel() {
-            try {
-                // हम LaMini-Flan-T5 मॉडल इस्तेमाल कर रहे हैं (यह छोटा और तेज़ है)
-                // text2text-generation का मतलब है सवाल पूछो और सीधा जवाब पाओ
-                generator = await pipeline('text2text-generation', 'Xenova/LaMini-Flan-T5-78M', {
-                    // जब मॉडल डाउनलोड हो रहा हो, तो प्रोग्रेस अपडेट करो
-                    progress_callback: (progress) => {
-                        if (progress.status === 'downloading' || progress.status === 'progress') {
-                            const percent = Math.round((progress.loaded / progress.total) * 100) || 0;
-                            progressBar.style.width = `${percent}%`;
-                            downloadPercent.innerText = `${percent}%`;
-                            downloadFile.innerText = progress.file || 'वज़न (Weights) डाउनलोड हो रहे हैं...';
-                        }
+            <!-- Send -->
+
+            <button
+                type="submit"
+                id="sendBtn"
+                disabled
+                class="shrink-0 w-14 h-14 rounded-2xl bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-700 flex items-center justify-center transition glow"
+            >
+
+                <i data-lucide="send"
+                   class="w-5 h-5"></i>
+
+            </button>
+
+        </form>
+
+    </footer>
+
+</div>
+
+<!-- ====================================================== -->
+<!-- LOADING -->
+<!-- ====================================================== -->
+
+<div id="loadingScreen"
+     class="fixed inset-0 bg-slate-950/95 z-50 flex items-center justify-center p-5">
+
+    <div class="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl p-8 text-center">
+
+        <div class="relative w-24 h-24 mx-auto mb-6">
+
+            <div class="absolute inset-0 rounded-full border-4 border-cyan-500/20"></div>
+
+            <div class="absolute inset-0 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
+
+            <i data-lucide="cpu"
+               class="absolute w-10 h-10 text-cyan-400 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></i>
+
+        </div>
+
+        <h2 class="text-xl font-bold mb-3">
+
+            AI डाउनलोड हो रहा है...
+
+        </h2>
+
+        <p class="text-sm text-slate-400 mb-6">
+
+            पहली बार थोड़ा समय लगेगा 😄
+
+        </p>
+
+        <div class="space-y-2">
+
+            <div class="flex justify-between text-xs">
+
+                <span id="downloadFile">
+
+                    तैयारी हो रही है...
+
+                </span>
+
+                <span id="downloadPercent">
+
+                    0%
+
+                </span>
+
+            </div>
+
+            <div class="h-3 bg-slate-800 rounded-full overflow-hidden">
+
+                <div id="progressBar"
+                     class="h-full w-0 bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-300"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ====================================================== -->
+<!-- SCRIPT -->
+<!-- ====================================================== -->
+
+<script type="module">
+
+import {
+    pipeline,
+    env
+}
+from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+
+// ======================================================
+// ENV
+// ======================================================
+
+env.allowLocalModels = false;
+env.useBrowserCache = true;
+
+env.backends.onnx.wasm.numThreads = 1;
+
+// ======================================================
+// ELEMENTS
+// ======================================================
+
+const chatContainer =
+    document.getElementById('chatContainer');
+
+const chatForm =
+    document.getElementById('chatForm');
+
+const userInput =
+    document.getElementById('userInput');
+
+const sendBtn =
+    document.getElementById('sendBtn');
+
+const typingIndicator =
+    document.getElementById('typingIndicator');
+
+const loadingScreen =
+    document.getElementById('loadingScreen');
+
+const progressBar =
+    document.getElementById('progressBar');
+
+const downloadPercent =
+    document.getElementById('downloadPercent');
+
+const downloadFile =
+    document.getElementById('downloadFile');
+
+const voiceBtn =
+    document.getElementById('voiceBtn');
+
+const modelBadge =
+    document.getElementById('modelBadge');
+
+// ======================================================
+// AI
+// ======================================================
+
+let generator = null;
+
+// ======================================================
+// SAFE HTML
+// ======================================================
+
+function escapeHTML(str){
+
+    return str.replace(/[&<>"']/g, m => ({
+
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#039;'
+
+    })[m]);
+}
+
+// ======================================================
+// CHAT MEMORY
+// ======================================================
+
+let memory = JSON.parse(
+    localStorage.getItem('raftar-memory') || '[]'
+);
+
+// ======================================================
+// SAVE MEMORY
+// ======================================================
+
+function saveMemory(){
+
+    localStorage.setItem(
+        'raftar-memory',
+        JSON.stringify(memory)
+    );
+}
+
+// ======================================================
+// MESSAGE
+// ======================================================
+
+function appendMessage(sender,text){
+
+    const wrapper =
+        document.createElement('div');
+
+    wrapper.className =
+        `flex ${sender === 'user'
+            ? 'justify-end'
+            : 'justify-start'} msg`;
+
+    const bubble =
+        document.createElement('div');
+
+    bubble.className =
+        sender === 'user'
+        ?
+        'max-w-[85%] bg-cyan-700 text-white rounded-2xl rounded-tr-none p-4 shadow-lg whitespace-pre-wrap'
+        :
+        'max-w-[85%] bg-slate-800 border border-slate-700 text-slate-200 rounded-2xl rounded-tl-none p-4 shadow-lg whitespace-pre-wrap';
+
+    bubble.innerHTML =
+        escapeHTML(text);
+
+    wrapper.appendChild(bubble);
+
+    chatContainer.appendChild(wrapper);
+
+    chatContainer.scrollTop =
+        chatContainer.scrollHeight;
+}
+
+// ======================================================
+// TYPE EFFECT
+// ======================================================
+
+async function typeMessage(text){
+
+    const wrapper =
+        document.createElement('div');
+
+    wrapper.className =
+        'flex justify-start msg';
+
+    const bubble =
+        document.createElement('div');
+
+    bubble.className =
+        'max-w-[85%] bg-slate-800 border border-slate-700 text-slate-200 rounded-2xl rounded-tl-none p-4 shadow-lg whitespace-pre-wrap';
+
+    wrapper.appendChild(bubble);
+
+    chatContainer.appendChild(wrapper);
+
+    let current = '';
+
+    for(let char of text){
+
+        current += char;
+
+        bubble.textContent = current;
+
+        chatContainer.scrollTop =
+            chatContainer.scrollHeight;
+
+        await new Promise(r =>
+            setTimeout(r,8)
+        );
+    }
+}
+
+// ======================================================
+// LOAD MODEL
+// ======================================================
+
+async function loadModel(){
+
+    try{
+
+        generator = await pipeline(
+
+            'text-generation',
+
+            'Xenova/distilgpt2',
+
+            {
+
+                progress_callback:data=>{
+
+                    if(data.progress){
+
+                        const percent =
+                            Math.round(data.progress);
+
+                        progressBar.style.width =
+                            percent + '%';
+
+                        downloadPercent.innerText =
+                            percent + '%';
                     }
-                });
 
-                // डाउनलोड पूरा होने पर लोडिंग स्क्रीन हटा दें
-                loadingScreen.style.opacity = '0';
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                    userInput.disabled = false;
-                    userInput.focus();
-                }, 500);
+                    if(data.file){
 
-            } catch (error) {
-                console.error("Model loading error:", error);
-                downloadFile.innerText = "एरर आ गया!";
-                downloadFile.classList.add("text-rose-400");
-                downloadPercent.innerText = "मॉडल लोड नहीं हो सका। अपना इंटरनेट चेक करें।";
+                        downloadFile.innerText =
+                            data.file;
+                    }
+                }
             }
+        );
+
+        modelBadge.innerText =
+            'Model Ready';
+
+        modelBadge.className =
+            'px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30 text-xs text-green-300';
+
+        loadingScreen.style.opacity = '0';
+
+        setTimeout(()=>{
+
+            loadingScreen.remove();
+
+        },500);
+
+        userInput.disabled = false;
+
+        userInput.focus();
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+        downloadFile.innerText =
+            'डाउनलोड फेल हो गया 😢';
+
+        downloadPercent.innerText =
+            'Internet Check करो';
+
+        modelBadge.innerText =
+            'Load Failed';
+
+        modelBadge.className =
+            'px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-xs text-red-300';
+    }
+}
+
+// ======================================================
+// AUTO RESIZE
+// ======================================================
+
+userInput.addEventListener('input',()=>{
+
+    userInput.style.height = 'auto';
+
+    userInput.style.height =
+        userInput.scrollHeight + 'px';
+
+    sendBtn.disabled =
+        !userInput.value.trim();
+});
+
+// ======================================================
+// ENTER SEND
+// ======================================================
+
+userInput.addEventListener('keydown',e=>{
+
+    if(e.key === 'Enter' && !e.shiftKey){
+
+        e.preventDefault();
+
+        if(!sendBtn.disabled){
+
+            chatForm.dispatchEvent(
+                new Event('submit')
+            );
+        }
+    }
+});
+
+// ======================================================
+// CHAT SUBMIT
+// ======================================================
+
+chatForm.addEventListener('submit',async e=>{
+
+    e.preventDefault();
+
+    const text =
+        userInput.value.trim();
+
+    if(!text || !generator)
+        return;
+
+    appendMessage('user',text);
+
+    memory.push({
+        role:'user',
+        text
+    });
+
+    saveMemory();
+
+    userInput.value = '';
+
+    userInput.style.height = 'auto';
+
+    userInput.disabled = true;
+
+    sendBtn.disabled = true;
+
+    typingIndicator.classList.remove('hidden');
+
+    try{
+
+        const prompt = `
+You are Raftar AI.
+You are helpful.
+Answer shortly and smartly.
+
+User:
+${text}
+
+AI:
+`;
+
+        const result =
+            await generator(prompt,{
+
+                max_new_tokens:80,
+                temperature:0.8,
+                top_k:40,
+                do_sample:true,
+                repetition_penalty:1.2
+            });
+
+        let reply =
+            result[0].generated_text
+            .replace(prompt,'')
+            .trim();
+
+        if(!reply){
+
+            reply =
+                'मुझे इसका जवाब नहीं मिल रहा 😅';
         }
 
-        // यूज़र के मैसेज भेजने का हैंडलर
-        chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const text = userInput.value.trim();
-            if (!text || !generator) return;
+        typingIndicator.classList.add('hidden');
 
-            // 1. यूज़र का मैसेज दिखाएं
-            appendMessage('user', text);
-            userInput.value = '';
-            userInput.style.height = 'auto';
-            userInput.disabled = true;
-            sendBtn.disabled = true;
+        await typeMessage(reply);
 
-            // 2. AI का टाइपिंग इंडिकेटर दिखाएं
-            typingIndicator.classList.remove('hidden');
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-
-            try {
-                // 3. असली AI से जनरेट करवाएं (Transformer Magic!)
-                // यह तुम्हारे कंप्यूटर का प्रोसेसर इस्तेमाल करेगा
-                const output = await generator(text, {
-                    max_new_tokens: 100,
-                    temperature: 0.7,
-                    repetition_penalty: 1.2
-                });
-
-                // 4. टाइपिंग छुपाएं और जवाब दिखाएं
-                typingIndicator.classList.add('hidden');
-                
-                // आउटपुट टेक्स्ट निकालें
-                const aiResponse = output[0].generated_text;
-                appendMessage('bot', aiResponse);
-
-            } catch (error) {
-                typingIndicator.classList.add('hidden');
-                appendMessage('bot', 'माफ़ करना, मेरे दिमाग में कुछ शॉर्ट-सर्किट हो गया। एरर: ' + error.message);
-            } finally {
-                // इनपुट वापस चालू करें
-                userInput.disabled = false;
-                userInput.focus();
-                sendBtn.disabled = true;
-            }
+        memory.push({
+            role:'ai',
+            text:reply
         });
 
-        // आइकन्स इनिशियलाइज़ करें
-        lucide.createIcons();
+        saveMemory();
 
-        // पेज लोड होते ही मॉडल डाउनलोड शुरू करें
-        window.onload = () => {
-            loadAIModel();
-        };
+    }
 
-    </script>
+    catch(err){
+
+        console.error(err);
+
+        typingIndicator.classList.add('hidden');
+
+        appendMessage(
+            'bot',
+            'AI क्रैश हो गया 😢'
+        );
+    }
+
+    finally{
+
+        userInput.disabled = false;
+
+        userInput.focus();
+    }
+});
+
+// ======================================================
+// VOICE INPUT
+// ======================================================
+
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+if(SpeechRecognition){
+
+    const recognition =
+        new SpeechRecognition();
+
+    recognition.lang = 'hi-IN';
+
+    recognition.continuous = false;
+
+    recognition.interimResults = false;
+
+    voiceBtn.addEventListener('click',()=>{
+
+        recognition.start();
+
+        voiceBtn.classList.add(
+            'bg-cyan-600'
+        );
+    });
+
+    recognition.onresult = e => {
+
+        userInput.value =
+            e.results[0][0].transcript;
+
+        userInput.dispatchEvent(
+            new Event('input')
+        );
+    };
+
+    recognition.onend = ()=>{
+
+        voiceBtn.classList.remove(
+            'bg-cyan-600'
+        );
+    };
+}
+
+// ======================================================
+// LOAD OLD MEMORY
+// ======================================================
+
+function loadOldChats(){
+
+    if(memory.length === 0)
+        return;
+
+    memory.forEach(m=>{
+
+        appendMessage(
+            m.role === 'user'
+                ? 'user'
+                : 'bot',
+
+            m.text
+        );
+    });
+}
+
+// ======================================================
+// START
+// ======================================================
+
+lucide.createIcons();
+
+loadOldChats();
+
+window.onload = ()=>{
+
+    loadModel();
+};
+
+</script>
+
 </body>
 </html>
-
-
-                    
