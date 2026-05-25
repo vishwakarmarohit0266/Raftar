@@ -3,133 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>असली Brain.js AI चैटबॉट</title>
-    <!-- Brain.js की लेटेस्ट लाइब्रेरी जो LSTM सपोर्ट करती है -->
-    <script src="https://unpkg.com"></script>
+    <title>असली लोकल ट्रांसफॉर्मर AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f7; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .chat-container { width: 450px; height: 85vh; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; }
-        .chat-header { background: #075e54; color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 1.2em; }
-        .chat-box { flex: 1; padding: 20px; overflow-y: auto; background: #efeae2; display: flex; flex-direction: column; }
-        .message { margin: 8px 0; padding: 10px 14px; border-radius: 10px; max-width: 75%; font-size: 0.95em; line-height: 1.4; word-wrap: break-word; }
-        .user-msg { background: #dcf8c6; color: #303030; align-self: flex-end; border-top-right-radius: 0; }
-        .bot-msg { background: white; color: #303030; align-self: flex-start; border-top-left-radius: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .status { font-size: 13px; color: #fff; background: #128c7e; text-align: center; padding: 5px; font-weight: 500; }
-        .input-area { display: flex; padding: 15px; background: #f0f0f0; }
-        input { flex: 1; padding: 12px 18px; border: none; border-radius: 25px; outline: none; font-size: 1em; }
-        button { background: #075e54; color: white; border: none; padding: 12px 25px; border-radius: 25px; margin-left: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        button:hover { background: #128c7e; }
-        button:disabled, input:disabled { opacity: 0.6; cursor: not-allowed; }
+        /* कस्टम स्क्रॉलबार */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        /* टाइपिंग एनिमेशन */
+        .typing-dot {
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-white">
 
-<div class="chat-container">
-    <div class="chat-header">असली AI चैटबॉट</div>
-    <div id="status" class="status">🧠 AI दिमाग लोड हो रहा है और सीख रहा है...</div>
-    <div class="chat-box" id="chatBox"></div>
-    <div class="input-area">
-        <input type="text" id="userInput" placeholder="यहाँ टाइप करें..." onkeypress="handleKeyPress(event)" disabled>
-        <button id="sendBtn" onclick="sendMessage()" disabled>भेजें</button>
+    <div class="flex-1 flex flex-col max-w-4xl mx-auto w-full shadow-2xl bg-slate-950 border-x border-slate-800 relative overflow-hidden h-screen">
+        
+        <!-- हेडर -->
+        <div class="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center z-10 shadow-md">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                    <i data-lucide="cpu" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-slate-100 tracking-wide">लोकल ट्रांसफॉर्मर <span class="text-xs bg-cyan-900 text-cyan-300 px-2 py-0.5 rounded-full ml-1 border border-cyan-700">T5 Model</span></h1>
+                    <p class="text-xs text-slate-400">100% ब्राउज़र के अंदर चलने वाला असली AI</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- मॉडल डाउनलोडिंग / लोडिंग स्क्रीन (शुरुआत में दिखेगी) -->
+        <div id="loadingScreen" class="absolute inset-0 bg-slate-950/90 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-8 transition-opacity duration-500">
+            <div class="w-full max-w-md bg-slate-900 p-8 rounded-2xl border border-slate-700 shadow-2xl text-center space-y-6">
+                <div class="relative w-20 h-20 mx-auto">
+                    <div class="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-cyan-500 rounded-full border-t-transparent animate-spin"></div>
+                    <i data-lucide="brain-circuit" class="w-8 h-8 text-cyan-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                </div>
+                
+                <div>
+                    <h2 class="text-xl font-bold text-slate-100 mb-2">AI का दिमाग डाउनलोड हो रहा है...</h2>
+                    <p class="text-sm text-slate-400">हम Hugging Face से <b>LaMini-Flan-T5</b> (लगभग 100MB) मॉडल तुम्हारे ब्राउज़र के कैश (Cache) में ला रहे हैं। यह सिर्फ एक बार होगा!</p>
+                </div>
+
+                <!-- प्रोग्रेस बार -->
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs text-slate-300 font-mono">
+                        <span id="downloadFile">शुरू हो रहा है...</span>
+                        <span id="downloadPercent">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
+                        <div id="progressBar" class="bg-gradient-to-r from-cyan-500 to-blue-500 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- चैट कंटेनर -->
+        <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth">
+            <!-- वेलकम मैसेज -->
+            <div class="flex justify-start">
+                <div class="bg-slate-800 text-slate-200 rounded-2xl rounded-tl-none p-4 max-w-[85%] shadow-md border border-slate-700">
+                    <p class="text-sm leading-relaxed">नमस्ते! मैं एक असली जनरेटिव AI हूँ। मेरा मॉडल तुम्हारे ही डिवाइस पर लोड हो चुका है।</p>
+                    <p class="text-sm leading-relaxed mt-2 text-cyan-300">नोट: मैं एक छोटा मॉडल (78 Million Parameters) हूँ, इसलिए मैं अंग्रेजी (English) ज़्यादा अच्छे से समझता हूँ। मुझसे इंग्लिश में सवाल पूछ कर देखो! (जैसे: "Write a poem about space" या "What is a black hole?")</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- टाइपिंग इंडिकेटर (छुपा हुआ) -->
+        <div id="typingIndicator" class="hidden px-4 pb-4">
+            <div class="flex justify-start">
+                <div class="bg-slate-800 rounded-2xl rounded-tl-none p-4 shadow-md border border-slate-700 flex items-center gap-1.5 w-fit">
+                    <div class="w-2 h-2 bg-cyan-500 rounded-full typing-dot"></div>
+                    <div class="w-2 h-2 bg-cyan-500 rounded-full typing-dot"></div>
+                    <div class="w-2 h-2 bg-cyan-500 rounded-full typing-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- इनपुट एरिया -->
+        <div class="p-4 bg-slate-900 border-t border-slate-800 z-10 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+            <form id="chatForm" class="flex items-end gap-3">
+                <textarea 
+                    id="userInput" 
+                    rows="1" 
+                    placeholder="मुझसे कुछ भी पूछो... (English works best)" 
+                    disabled
+                    class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-slate-100 resize-none disabled:opacity-50 transition-all"
+                ></textarea>
+                <button 
+                    type="submit" 
+                    id="sendBtn" 
+                    disabled
+                    class="bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-700 disabled:text-slate-500 text-white p-3.5 rounded-xl transition-all shadow-lg shadow-cyan-600/20 flex items-center justify-center shrink-0"
+                >
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </button>
+            </form>
+        </div>
     </div>
-</div>
 
-<script>
-    // 1. LSTM न्यूरल नेटवर्क बनाना (यह टेक्स्ट का पैटर्न और संदर्भ सीखता है)
-    const net = new brain.recurrent.LSTM();
+    <!-- Transformers.js को ES Module की तरह इम्पोर्ट करना -->
+    <script type="module">
+        // Hugging Face की Transformers.js लाइब्रेरी
+        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.1';
 
-    // 2. रीयल-लाइफ ट्रेनिंग डेटा (मल्टीपल पैटर्न्स के साथ)
-    // आप इसमें जितने चाहें उतने रोजमर्रा के सवाल-जवाब जोड़ सकते हैं
-    const trainingData = [
-        { input: 'hi', output: 'hello' },
-        { input: 'hello', output: 'namaste' },
-        { input: 'hey', output: 'hello' },
-        { input: 'kaise ho aap', output: 'main badhiya hoon' },
-        { input: 'kya haal chal', output: 'sab badhiya, aap batao' },
-        { input: 'tum kaun ho', output: 'main ek brain js ai hoon' },
-        { input: 'tumhara naam kya hai', output: 'mujhe brain js bot kehte hain' },
-        { input: 'kya kar sakte ho', output: 'main aapse baatein kar sakta hoon' },
-        { input: 'kya tum robot ho', output: 'haan, main ek smart js network hoon' },
-        { input: 'bye bye', output: 'alvida' },
-        { input: 'chalta hoon bye', output: 'alvida' }
-    ];
+        // कॉन्फ़िगरेशन: हम लोकल फाइल्स नहीं ढूँढ रहे, सीधा हब (Hub) से लाएंगे
+        env.allowLocalModels = false;
+        env.useBrowserCache = true; // एक बार डाउनलोड होने के बाद सेव हो जाएगा
 
-    // रिस्पॉन्स को सुंदर हिंदी वाक्यों में बदलने का नक्शा
-    const replies = {
-        'hello': 'हेलो! कैसे हैं आप? 😊',
-        'namaste': 'नमस्ते जी! स्वागत है आपका।',
-        'main badhiya hoon': 'मैं एकदम बढ़िया हूँ! आप सुनाओ, सब कैसा चल रहा है?',
-        'sab badhiya, aap batao': 'यहाँ सब मस्त है! आप बताओ क्या चल रहा है?',
-        'main ek brain js ai hoon': 'मैं एक न्यूरल नेटवर्क आधारित AI हूँ, जो सीधे आपके ब्राउज़र में चल रहा हूँ। 🧠',
-        'mujhe brain js bot kehte hain': 'मेरा नाम Brain.js AI बॉट है। मुझे कोड से बनाया गया है।',
-        'main aapse baatein kar sakta hoon': 'मैं आपके सवालों को समझकर उनके पैटर्न से सीख सकता हूँ और बातें कर सकता हूँ।',
-        'haan, main ek smart js network hoon': 'जी हाँ, मैं एक डिजिटल रोबोट हूँ जो आपके ब्राउज़र के अंदर ही सोचता है। 🤖',
-        'alvida': 'अलविदा! अपना ख्याल रखिएगा, फिर मिलते हैं! 👋'
-    };
+        // UI एलिमेंट्स
+        const loadingScreen = document.getElementById('loadingScreen');
+        const progressBar = document.getElementById('progressBar');
+        const downloadFile = document.getElementById('downloadFile');
+        const downloadPercent = document.getElementById('downloadPercent');
+        const chatContainer = document.getElementById('chatContainer');
+        const chatForm = document.getElementById('chatForm');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
 
-    // बैकग्राउंड में ट्रेनिंग शुरू करना (ब्राउज़र फ्रीज न हो इसलिए async/setTimeout का उपयोग)
-    setTimeout(() => {
-        console.log("ट्रेनिंग चालू हो गई है...");
-        net.train(trainingData, {
-            iterations: 120,    // कितनी गहराई से सीखना है (रीयल टाइम के लिए 120-150 काफी है)
-            errorThresh: 0.011, // एरर रेट
-            log: (stats) => console.log(stats)
+        // AI मॉडल का वेरिएबल
+        let generator;
+
+        // चैट में मैसेज जोड़ने का फंक्शन
+        function appendMessage(sender, text) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+
+            const bgColor = sender === 'user' ? 'bg-cyan-700 text-white rounded-tr-none' : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700';
+            
+            wrapper.innerHTML = `
+                <div class="${bgColor} rounded-2xl p-4 max-w-[85%] shadow-md whitespace-pre-wrap text-sm leading-relaxed">
+                    ${text}
+                </div>
+            `;
+
+            chatContainer.appendChild(wrapper);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // टेक्स्ट एरिया को ऑटो-रिसाइज़ करने का फंक्शन
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if(this.value.trim().length > 0 && generator) {
+                sendBtn.disabled = false;
+            } else {
+                sendBtn.disabled = true;
+            }
         });
 
-        // ट्रेनिंग पूरी होने पर UI अनलॉक करें
-        document.getElementById('status').innerText = "✅ AI दिमाग पूरी तरह एक्टिव है! बात शुरू करें।";
-        document.getElementById('status').style.background = "#25d366";
-        document.getElementById('userInput').disabled = false;
-        document.getElementById('sendBtn').disabled = false;
-        
-        appendMessage('हेलो! मेरा AI दिमाग अब तैयार है। मुझसे कुछ भी पूछिए। 🤖', 'bot-msg');
-    }, 1000);
-
-    function sendMessage() {
-        const inputField = document.getElementById('userInput');
-        const userText = inputField.value.trim();
-        if (!userText) return;
-
-        // यूजर का मैसेज स्क्रीन पर दिखाएं
-        appendMessage(userText, 'user-msg');
-        inputField.value = '';
-
-        // बॉट को थोड़ा सोचने का समय दें (Real feel के लिए)
-        setTimeout(() => {
-            // अक्षरों को छोटे रूप (lowercase) में बदलें ताकि न्यूरल नेटवर्क भ्रमित न हो
-            const cleanedInput = userText.toLowerCase();
-            
-            // Brain.js न्यूरल नेटवर्क से प्रेडिक्शन (जवाब) निकालना
-            const predictedOutput = net.run(cleanedInput);
-            console.log("AI ने प्रेडिक्ट किया:", predictedOutput);
-
-            // नेटवर्क द्वारा सीखे गए पैटर्न को असली हिंदी जवाब से मैच करना
-            let botReply = replies[predictedOutput.trim()];
-
-            // अगर नेटवर्क बिल्कुल नया पैटर्न देखता है जो वह नहीं समझ पाया
-            if (!botReply) {
-                botReply = "हूँ... मैं इस बात का पैटर्न पूरी तरह समझ नहीं पाया। मुझे थोड़ा और डेटा देकर ट्रेन करो! 🧠";
+        // एंटर दबाने पर मैसेज भेजना (Shift+Enter से नई लाइन)
+        userInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if(!sendBtn.disabled) chatForm.dispatchEvent(new Event('submit'));
             }
+        });
 
-            appendMessage(botReply, 'bot-msg');
-        }, 600);
-    }
+        // मॉडल को लोड करने का मुख्य फंक्शन
+        async function loadAIModel() {
+            try {
+                // हम LaMini-Flan-T5 मॉडल इस्तेमाल कर रहे हैं (यह छोटा और तेज़ है)
+                // text2text-generation का मतलब है सवाल पूछो और सीधा जवाब पाओ
+                generator = await pipeline('text2text-generation', 'Xenova/LaMini-Flan-T5-78M', {
+                    // जब मॉडल डाउनलोड हो रहा हो, तो प्रोग्रेस अपडेट करो
+                    progress_callback: (progress) => {
+                        if (progress.status === 'downloading' || progress.status === 'progress') {
+                            const percent = Math.round((progress.loaded / progress.total) * 100) || 0;
+                            progressBar.style.width = `${percent}%`;
+                            downloadPercent.innerText = `${percent}%`;
+                            downloadFile.innerText = progress.file || 'वज़न (Weights) डाउनलोड हो रहे हैं...';
+                        }
+                    }
+                });
 
-    function handleKeyPress(event) {
-        if (event.key === 'Enter') {
-            sendMessage();
+                // डाउनलोड पूरा होने पर लोडिंग स्क्रीन हटा दें
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    userInput.disabled = false;
+                    userInput.focus();
+                }, 500);
+
+            } catch (error) {
+                console.error("Model loading error:", error);
+                downloadFile.innerText = "एरर आ गया!";
+                downloadFile.classList.add("text-rose-400");
+                downloadPercent.innerText = "मॉडल लोड नहीं हो सका। अपना इंटरनेट चेक करें।";
+            }
         }
-    }
 
-    function appendMessage(text, className) {
-        const chatBox = document.getElementById('chatBox');
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `message ${className}`;
-        msgDiv.innerText = text;
-        chatBox.appendChild(msgDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-</script>
+        // यूज़र के मैसेज भेजने का हैंडलर
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text || !generator) return;
 
+            // 1. यूज़र का मैसेज दिखाएं
+            appendMessage('user', text);
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+
+            // 2. AI का टाइपिंग इंडिकेटर दिखाएं
+            typingIndicator.classList.remove('hidden');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            try {
+                // 3. असली AI से जनरेट करवाएं (Transformer Magic!)
+                // यह तुम्हारे कंप्यूटर का प्रोसेसर इस्तेमाल करेगा
+                const output = await generator(text, {
+                    max_new_tokens: 100,
+                    temperature: 0.7,
+                    repetition_penalty: 1.2
+                });
+
+                // 4. टाइपिंग छुपाएं और जवाब दिखाएं
+                typingIndicator.classList.add('hidden');
+                
+                // आउटपुट टेक्स्ट निकालें
+                const aiResponse = output[0].generated_text;
+                appendMessage('bot', aiResponse);
+
+            } catch (error) {
+                typingIndicator.classList.add('hidden');
+                appendMessage('bot', 'माफ़ करना, मेरे दिमाग में कुछ शॉर्ट-सर्किट हो गया। एरर: ' + error.message);
+            } finally {
+                // इनपुट वापस चालू करें
+                userInput.disabled = false;
+                userInput.focus();
+                sendBtn.disabled = true;
+            }
+        });
+
+        // आइकन्स इनिशियलाइज़ करें
+        lucide.createIcons();
+
+        // पेज लोड होते ही मॉडल डाउनलोड शुरू करें
+        window.onload = () => {
+            loadAIModel();
+        };
+
+    </script>
 </body>
 </html>
+
+
+                    
