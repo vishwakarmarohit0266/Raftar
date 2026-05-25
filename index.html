@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>रफ़्तार AI • Local Transformer</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>रफ़्तार AI</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -26,26 +27,23 @@ body{
     width:6px;
 }
 
-::-webkit-scrollbar-track{
-    background:transparent;
-}
-
 ::-webkit-scrollbar-thumb{
     background:#334155;
     border-radius:10px;
 }
 
-/* ===== BG EFFECT ===== */
+/* ===== GRID ===== */
 
 .bg-grid{
+
     background-image:
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
 
     background-size:40px 40px;
 }
 
-/* ===== MESSAGE ANIMATION ===== */
+/* ===== MESSAGE ===== */
 
 .msg{
     animation:msg .25s ease;
@@ -60,7 +58,7 @@ body{
 
     to{
         opacity:1;
-        transform:translateY(0px);
+        transform:translateY(0);
     }
 }
 
@@ -91,38 +89,32 @@ body{
     }
 }
 
-/* ===== GLASS ===== */
-
-.glass{
-    backdrop-filter:blur(10px);
-    background:rgba(15,23,42,.65);
-}
-
-/* ===== GLOW ===== */
-
-.glow{
-    box-shadow:
-        0 0 25px rgba(6,182,212,.35);
-}
-
-/* ===== TEXTAREA ===== */
-
 textarea{
     max-height:180px;
 }
 
+.glass{
+    backdrop-filter:blur(12px);
+    background:rgba(15,23,42,.65);
+}
+
 </style>
+
 </head>
 
-<body class="text-slate-100">
+<body class="text-white">
 
 <!-- ====================================================== -->
-<!-- MAIN -->
+<!-- BG -->
 <!-- ====================================================== -->
 
 <div class="fixed inset-0 bg-grid"></div>
 
-<div class="relative h-screen flex flex-col max-w-5xl mx-auto border-x border-slate-800">
+<!-- ====================================================== -->
+<!-- APP -->
+<!-- ====================================================== -->
+
+<div class="relative h-screen max-w-5xl mx-auto border-x border-slate-800 flex flex-col">
 
     <!-- ====================================================== -->
     <!-- HEADER -->
@@ -134,16 +126,16 @@ textarea{
 
             <div class="flex items-center gap-3">
 
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-700 flex items-center justify-center glow">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-700 flex items-center justify-center shadow-lg shadow-cyan-500/30">
 
                     <i data-lucide="brain-circuit"
-                       class="w-6 h-6 text-white"></i>
+                       class="w-6 h-6"></i>
 
                 </div>
 
                 <div>
 
-                    <h1 class="font-bold text-lg tracking-wide">
+                    <h1 class="font-bold text-lg">
 
                         रफ़्तार AI
 
@@ -151,21 +143,18 @@ textarea{
 
                     <p class="text-xs text-slate-400">
 
-                        100% Local Browser AI • Created By Rohit Vishwakarma
+                        Local Offline AI • Browser Based
 
                     </p>
 
                 </div>
+
             </div>
 
-            <div class="flex items-center gap-2">
+            <div id="statusBadge"
+                 class="px-3 py-1 rounded-full text-xs bg-amber-500/20 border border-amber-500/30 text-amber-300">
 
-                <div id="modelBadge"
-                     class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-xs text-amber-300">
-
-                    Loading Model...
-
-                </div>
+                Loading Model...
 
             </div>
 
@@ -180,8 +169,6 @@ textarea{
     <main id="chatContainer"
           class="flex-1 overflow-y-auto p-4 space-y-5">
 
-        <!-- Welcome -->
-
         <div class="flex justify-start msg">
 
             <div class="max-w-[85%] bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-none p-4">
@@ -191,23 +178,24 @@ textarea{
                     नमस्ते 👋<br><br>
 
                     मैं <b>रफ़्तार AI</b> हूँ।<br>
+
                     मैं तुम्हारे डिवाइस पर ही चलता हूँ 🔥
 
                 </p>
 
-                <div class="mt-4 text-sm text-cyan-300">
+                <div class="mt-4 text-cyan-300 text-sm">
 
                     Features:
                     <br>
                     • Offline AI
                     <br>
-                    • Local Memory
-                    <br>
-                    • Voice Support
-                    <br>
-                    • Fast UI
-                    <br>
                     • Browser Cache
+                    <br>
+                    • Voice Input
+                    <br>
+                    • Chat Memory
+                    <br>
+                    • Mobile Friendly
 
                 </div>
 
@@ -228,11 +216,11 @@ textarea{
 
             <div class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-none px-4 py-3 flex gap-1">
 
-                <div class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"></div>
+                <div class="w-2 h-2 bg-cyan-400 rounded-full typing-dot"></div>
 
-                <div class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"></div>
+                <div class="w-2 h-2 bg-cyan-400 rounded-full typing-dot"></div>
 
-                <div class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"></div>
+                <div class="w-2 h-2 bg-cyan-400 rounded-full typing-dot"></div>
 
             </div>
 
@@ -247,13 +235,13 @@ textarea{
     <footer class="glass border-t border-slate-800 p-4">
 
         <form id="chatForm"
-              class="flex gap-3 items-end">
+              class="flex items-end gap-3">
 
             <!-- Voice -->
 
             <button type="button"
                     id="voiceBtn"
-                    class="shrink-0 w-12 h-12 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition">
+                    class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition shrink-0">
 
                 <i data-lucide="mic"
                    class="w-5 h-5"></i>
@@ -276,8 +264,7 @@ textarea{
                 type="submit"
                 id="sendBtn"
                 disabled
-                class="shrink-0 w-14 h-14 rounded-2xl bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-700 flex items-center justify-center transition glow"
-            >
+                class="w-14 h-14 rounded-2xl bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-700 flex items-center justify-center transition shrink-0">
 
                 <i data-lucide="send"
                    class="w-5 h-5"></i>
@@ -366,11 +353,12 @@ import {
 from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
 
 // ======================================================
-// ENV
+// CONFIG
 // ======================================================
 
 env.allowLocalModels = false;
 env.useBrowserCache = true;
+env.useFSCache = false;
 
 env.backends.onnx.wasm.numThreads = 1;
 
@@ -408,11 +396,11 @@ const downloadFile =
 const voiceBtn =
     document.getElementById('voiceBtn');
 
-const modelBadge =
-    document.getElementById('modelBadge');
+const statusBadge =
+    document.getElementById('statusBadge');
 
 // ======================================================
-// AI
+// MODEL
 // ======================================================
 
 let generator = null;
@@ -423,7 +411,7 @@ let generator = null;
 
 function escapeHTML(str){
 
-    return str.replace(/[&<>"']/g, m => ({
+    return str.replace(/[&<>"']/g,m=>({
 
         '&':'&amp;',
         '<':'&lt;',
@@ -435,27 +423,7 @@ function escapeHTML(str){
 }
 
 // ======================================================
-// CHAT MEMORY
-// ======================================================
-
-let memory = JSON.parse(
-    localStorage.getItem('raftar-memory') || '[]'
-);
-
-// ======================================================
-// SAVE MEMORY
-// ======================================================
-
-function saveMemory(){
-
-    localStorage.setItem(
-        'raftar-memory',
-        JSON.stringify(memory)
-    );
-}
-
-// ======================================================
-// MESSAGE
+// CHAT MESSAGE
 // ======================================================
 
 function appendMessage(sender,text){
@@ -474,9 +442,9 @@ function appendMessage(sender,text){
     bubble.className =
         sender === 'user'
         ?
-        'max-w-[85%] bg-cyan-700 text-white rounded-2xl rounded-tr-none p-4 shadow-lg whitespace-pre-wrap'
+        'max-w-[85%] bg-cyan-700 text-white rounded-2xl rounded-tr-none p-4 whitespace-pre-wrap'
         :
-        'max-w-[85%] bg-slate-800 border border-slate-700 text-slate-200 rounded-2xl rounded-tl-none p-4 shadow-lg whitespace-pre-wrap';
+        'max-w-[85%] bg-slate-800 border border-slate-700 text-slate-200 rounded-2xl rounded-tl-none p-4 whitespace-pre-wrap';
 
     bubble.innerHTML =
         escapeHTML(text);
@@ -505,7 +473,7 @@ async function typeMessage(text){
         document.createElement('div');
 
     bubble.className =
-        'max-w-[85%] bg-slate-800 border border-slate-700 text-slate-200 rounded-2xl rounded-tl-none p-4 shadow-lg whitespace-pre-wrap';
+        'max-w-[85%] bg-slate-800 border border-slate-700 text-slate-200 rounded-2xl rounded-tl-none p-4 whitespace-pre-wrap';
 
     wrapper.appendChild(bubble);
 
@@ -536,13 +504,23 @@ async function loadModel(){
 
     try{
 
+        // Cache detect
+
+        if(localStorage.getItem('raftar-model')){
+
+            downloadFile.innerText =
+                'Cached Model Found ⚡';
+        }
+
         generator = await pipeline(
 
-            'text-generation',
+            'text2text-generation',
 
-            'Xenova/distilgpt2',
+            'Xenova/flan-t5-small',
 
             {
+
+                quantized:true,
 
                 progress_callback:data=>{
 
@@ -567,11 +545,16 @@ async function loadModel(){
             }
         );
 
-        modelBadge.innerText =
+        localStorage.setItem(
+            'raftar-model',
+            'loaded'
+        );
+
+        statusBadge.innerText =
             'Model Ready';
 
-        modelBadge.className =
-            'px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30 text-xs text-green-300';
+        statusBadge.className =
+            'px-3 py-1 rounded-full text-xs bg-green-500/20 border border-green-500/30 text-green-300';
 
         loadingScreen.style.opacity = '0';
 
@@ -591,17 +574,17 @@ async function loadModel(){
 
         console.error(err);
 
+        statusBadge.innerText =
+            'Load Failed';
+
+        statusBadge.className =
+            'px-3 py-1 rounded-full text-xs bg-red-500/20 border border-red-500/30 text-red-300';
+
         downloadFile.innerText =
-            'डाउनलोड फेल हो गया 😢';
+            'डाउनलोड फेल 😢';
 
         downloadPercent.innerText =
             'Internet Check करो';
-
-        modelBadge.innerText =
-            'Load Failed';
-
-        modelBadge.className =
-            'px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-xs text-red-300';
     }
 }
 
@@ -611,7 +594,8 @@ async function loadModel(){
 
 userInput.addEventListener('input',()=>{
 
-    userInput.style.height = 'auto';
+    userInput.style.height =
+        'auto';
 
     userInput.style.height =
         userInput.scrollHeight + 'px';
@@ -640,7 +624,7 @@ userInput.addEventListener('keydown',e=>{
 });
 
 // ======================================================
-// CHAT SUBMIT
+// CHAT
 // ======================================================
 
 chatForm.addEventListener('submit',async e=>{
@@ -653,14 +637,10 @@ chatForm.addEventListener('submit',async e=>{
     if(!text || !generator)
         return;
 
-    appendMessage('user',text);
-
-    memory.push({
-        role:'user',
+    appendMessage(
+        'user',
         text
-    });
-
-    saveMemory();
+    );
 
     userInput.value = '';
 
@@ -670,52 +650,40 @@ chatForm.addEventListener('submit',async e=>{
 
     sendBtn.disabled = true;
 
-    typingIndicator.classList.remove('hidden');
+    typingIndicator.classList.remove(
+        'hidden'
+    );
 
     try{
 
-        const prompt = `
-You are Raftar AI.
-You are helpful.
-Answer shortly and smartly.
-
-User:
-${text}
-
-AI:
-`;
-
         const result =
-            await generator(prompt,{
+            await generator(text,{
 
                 max_new_tokens:80,
-                temperature:0.8,
-                top_k:40,
-                do_sample:true,
-                repetition_penalty:1.2
+
+                temperature:.7
             });
 
+        typingIndicator.classList.add(
+            'hidden'
+        );
+
         let reply =
-            result[0].generated_text
-            .replace(prompt,'')
-            .trim();
+            result[0].generated_text.trim();
+
+        // Empty reply protection
 
         if(!reply){
 
             reply =
-                'मुझे इसका जवाब नहीं मिल रहा 😅';
+                'मुझे जवाब सोचने में दिक्कत हो रही है 😅';
         }
-
-        typingIndicator.classList.add('hidden');
 
         await typeMessage(reply);
 
-        memory.push({
-            role:'ai',
-            text:reply
-        });
+        // Voice speak
 
-        saveMemory();
+        speak(reply);
 
     }
 
@@ -723,11 +691,13 @@ AI:
 
         console.error(err);
 
-        typingIndicator.classList.add('hidden');
+        typingIndicator.classList.add(
+            'hidden'
+        );
 
         appendMessage(
             'bot',
-            'AI क्रैश हो गया 😢'
+            'AI जवाब देते समय क्रैश हो गया 😢'
         );
     }
 
@@ -786,24 +756,20 @@ if(SpeechRecognition){
 }
 
 // ======================================================
-// LOAD OLD MEMORY
+// SPEAK
 // ======================================================
 
-function loadOldChats(){
+function speak(text){
 
-    if(memory.length === 0)
+    if(!window.speechSynthesis)
         return;
 
-    memory.forEach(m=>{
+    const utter =
+        new SpeechSynthesisUtterance(text);
 
-        appendMessage(
-            m.role === 'user'
-                ? 'user'
-                : 'bot',
+    utter.lang = 'hi-IN';
 
-            m.text
-        );
-    });
+    speechSynthesis.speak(utter);
 }
 
 // ======================================================
@@ -811,8 +777,6 @@ function loadOldChats(){
 // ======================================================
 
 lucide.createIcons();
-
-loadOldChats();
 
 window.onload = ()=>{
 
