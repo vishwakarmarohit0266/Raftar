@@ -1,0 +1,19 @@
+/* css/themes.css */
+:root {
+    /* Dark Futuristic Cyber Theme */
+    --bg-color: #06090f;
+    --text-color: #c9d1d9;
+    --text-muted: #8b949e;
+    
+    --card-bg: #0d1117;
+    --header-bg: #0d1117;
+    --border-color: #30363d;
+    
+    --primary-color: #06b6d4; /* Cyan accent */
+    --primary-hover: #0891b2;
+    
+    --ai-msg-bg: #161b22;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+}
