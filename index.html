@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>असली Brain.js AI चैटबॉट</title>
+    <!-- Brain.js की लेटेस्ट लाइब्रेरी जो LSTM सपोर्ट करती है -->
+    <script src="https://unpkg.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f7; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .chat-container { width: 450px; height: 85vh; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; }
+        .chat-header { background: #075e54; color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 1.2em; }
+        .chat-box { flex: 1; padding: 20px; overflow-y: auto; background: #efeae2; display: flex; flex-direction: column; }
+        .message { margin: 8px 0; padding: 10px 14px; border-radius: 10px; max-width: 75%; font-size: 0.95em; line-height: 1.4; word-wrap: break-word; }
+        .user-msg { background: #dcf8c6; color: #303030; align-self: flex-end; border-top-right-radius: 0; }
+        .bot-msg { background: white; color: #303030; align-self: flex-start; border-top-left-radius: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .status { font-size: 13px; color: #fff; background: #128c7e; text-align: center; padding: 5px; font-weight: 500; }
+        .input-area { display: flex; padding: 15px; background: #f0f0f0; }
+        input { flex: 1; padding: 12px 18px; border: none; border-radius: 25px; outline: none; font-size: 1em; }
+        button { background: #075e54; color: white; border: none; padding: 12px 25px; border-radius: 25px; margin-left: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button:hover { background: #128c7e; }
+        button:disabled, input:disabled { opacity: 0.6; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">असली AI चैटबॉट</div>
+    <div id="status" class="status">🧠 AI दिमाग लोड हो रहा है और सीख रहा है...</div>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="यहाँ टाइप करें..." onkeypress="handleKeyPress(event)" disabled>
+        <button id="sendBtn" onclick="sendMessage()" disabled>भेजें</button>
+    </div>
+</div>
+
+<script>
+    // 1. LSTM न्यूरल नेटवर्क बनाना (यह टेक्स्ट का पैटर्न और संदर्भ सीखता है)
+    const net = new brain.recurrent.LSTM();
+
+    // 2. रीयल-लाइफ ट्रेनिंग डेटा (मल्टीपल पैटर्न्स के साथ)
+    // आप इसमें जितने चाहें उतने रोजमर्रा के सवाल-जवाब जोड़ सकते हैं
+    const trainingData = [
+        { input: 'hi', output: 'hello' },
+        { input: 'hello', output: 'namaste' },
+        { input: 'hey', output: 'hello' },
+        { input: 'kaise ho aap', output: 'main badhiya hoon' },
+        { input: 'kya haal chal', output: 'sab badhiya, aap batao' },
+        { input: 'tum kaun ho', output: 'main ek brain js ai hoon' },
+        { input: 'tumhara naam kya hai', output: 'mujhe brain js bot kehte hain' },
+        { input: 'kya kar sakte ho', output: 'main aapse baatein kar sakta hoon' },
+        { input: 'kya tum robot ho', output: 'haan, main ek smart js network hoon' },
+        { input: 'bye bye', output: 'alvida' },
+        { input: 'chalta hoon bye', output: 'alvida' }
+    ];
+
+    // रिस्पॉन्स को सुंदर हिंदी वाक्यों में बदलने का नक्शा
+    const replies = {
+        'hello': 'हेलो! कैसे हैं आप? 😊',
+        'namaste': 'नमस्ते जी! स्वागत है आपका।',
+        'main badhiya hoon': 'मैं एकदम बढ़िया हूँ! आप सुनाओ, सब कैसा चल रहा है?',
+        'sab badhiya, aap batao': 'यहाँ सब मस्त है! आप बताओ क्या चल रहा है?',
+        'main ek brain js ai hoon': 'मैं एक न्यूरल नेटवर्क आधारित AI हूँ, जो सीधे आपके ब्राउज़र में चल रहा हूँ। 🧠',
+        'mujhe brain js bot kehte hain': 'मेरा नाम Brain.js AI बॉट है। मुझे कोड से बनाया गया है।',
+        'main aapse baatein kar sakta hoon': 'मैं आपके सवालों को समझकर उनके पैटर्न से सीख सकता हूँ और बातें कर सकता हूँ।',
+        'haan, main ek smart js network hoon': 'जी हाँ, मैं एक डिजिटल रोबोट हूँ जो आपके ब्राउज़र के अंदर ही सोचता है। 🤖',
+        'alvida': 'अलविदा! अपना ख्याल रखिएगा, फिर मिलते हैं! 👋'
+    };
+
+    // बैकग्राउंड में ट्रेनिंग शुरू करना (ब्राउज़र फ्रीज न हो इसलिए async/setTimeout का उपयोग)
+    setTimeout(() => {
+        console.log("ट्रेनिंग चालू हो गई है...");
+        net.train(trainingData, {
+            iterations: 120,    // कितनी गहराई से सीखना है (रीयल टाइम के लिए 120-150 काफी है)
+            errorThresh: 0.011, // एरर रेट
+            log: (stats) => console.log(stats)
+        });
+
+        // ट्रेनिंग पूरी होने पर UI अनलॉक करें
+        document.getElementById('status').innerText = "✅ AI दिमाग पूरी तरह एक्टिव है! बात शुरू करें।";
+        document.getElementById('status').style.background = "#25d366";
+        document.getElementById('userInput').disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        
+        appendMessage('हेलो! मेरा AI दिमाग अब तैयार है। मुझसे कुछ भी पूछिए। 🤖', 'bot-msg');
+    }, 1000);
+
+    function sendMessage() {
+        const inputField = document.getElementById('userInput');
+        const userText = inputField.value.trim();
+        if (!userText) return;
+
+        // यूजर का मैसेज स्क्रीन पर दिखाएं
+        appendMessage(userText, 'user-msg');
+        inputField.value = '';
+
+        // बॉट को थोड़ा सोचने का समय दें (Real feel के लिए)
+        setTimeout(() => {
+            // अक्षरों को छोटे रूप (lowercase) में बदलें ताकि न्यूरल नेटवर्क भ्रमित न हो
+            const cleanedInput = userText.toLowerCase();
+            
+            // Brain.js न्यूरल नेटवर्क से प्रेडिक्शन (जवाब) निकालना
+            const predictedOutput = net.run(cleanedInput);
+            console.log("AI ने प्रेडिक्ट किया:", predictedOutput);
+
+            // नेटवर्क द्वारा सीखे गए पैटर्न को असली हिंदी जवाब से मैच करना
+            let botReply = replies[predictedOutput.trim()];
+
+            // अगर नेटवर्क बिल्कुल नया पैटर्न देखता है जो वह नहीं समझ पाया
+            if (!botReply) {
+                botReply = "हूँ... मैं इस बात का पैटर्न पूरी तरह समझ नहीं पाया। मुझे थोड़ा और डेटा देकर ट्रेन करो! 🧠";
+            }
+
+            appendMessage(botReply, 'bot-msg');
+        }, 600);
+    }
+
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    }
+
+    function appendMessage(text, className) {
+        const chatBox = document.getElementById('chatBox');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${className}`;
+        msgDiv.innerText = text;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
